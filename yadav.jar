@@ -1,0 +1,93 @@
+package com.example.magicpowers;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Fireball;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
+
+import java.util.HashMap;
+import java.util.Random;
+import java.util.UUID;
+
+public class MagicPowersPlugin extends JavaPlugin implements Listener {
+
+    private final HashMap<UUID, String> playerMagic = new HashMap<>();
+    private final Random random = new Random();
+
+    @Override
+    public void onEnable() {
+        Bukkit.getPluginManager().registerEvents(this, this);
+        getLogger().info("Magic Powers Plugin has been enabled!");
+    }
+
+    @Override
+    public void onDisable() {
+        getLogger().info("Magic Powers Plugin has been disabled!");
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        // If the player is joining for the first time, assign them a random magic power
+        if (!playerMagic.containsKey(player.getUniqueId())) {
+            String magic = assignRandomMagic();
+            playerMagic.put(player.getUniqueId(), magic);
+            player.sendMessage(ChatColor.GREEN + "You have been assigned the magic power: " + ChatColor.AQUA + magic);
+        }
+
+        String magic = playerMagic.get(player.getUniqueId());
+        player.sendMessage(ChatColor.YELLOW + "Welcome back! Your magic power is: " + ChatColor.AQUA + magic);
+    }
+
+    private String assignRandomMagic() {
+        String[] magicPowers = {"Fire Magic", "Water Magic", "Air Magic", "Speed Magic", "Strength Magic", "Explosion Magic"};
+        return magicPowers[random.nextInt(magicPowers.length)];
+    }
+
+    // Example Commands for Powers
+    public void applyMagicPower(Player player) {
+        String magic = playerMagic.get(player.getUniqueId());
+        if (magic == null) return;
+
+        switch (magic) {
+            case "Fire Magic":
+                player.setAllowFlight(true);
+                player.sendMessage(ChatColor.RED + "You can now fly and shoot fireballs!");
+                break;
+
+            case "Water Magic":
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, Integer.MAX_VALUE, 1));
+                player.sendMessage(ChatColor.BLUE + "You have water abilities!");
+                break;
+
+            case "Air Magic":
+                player.sendMessage(ChatColor.GRAY + "You can walk on air and push others with wind!");
+                break;
+
+            case "Speed Magic":
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 10));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 10));
+                player.sendMessage(ChatColor.YELLOW + "You are super fast!");
+                break;
+
+            case "Strength Magic":
+                player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 20 * 11, 10));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 11, 1));
+                player.sendMessage(ChatColor.DARK_RED + "You have immense strength!");
+                break;
+
+            case "Explosion Magic":
+                player.sendMessage(ChatColor.GOLD + "You can summon TNT!");
+                break;
+        }
+    }
+}
